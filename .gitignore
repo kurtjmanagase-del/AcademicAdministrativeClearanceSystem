@@ -1,0 +1,15 @@
+# Build outputs
+target/
+*.war
+*.class
+
+# IDE files
+nbproject/private/
+*.log
+
+# Database
+*.sql
+
+# OS files
+.DS_Store
+Thumbs.db

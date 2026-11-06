@@ -1,0 +1,90 @@
+/* FLOWCHART for the Clearance System defense
+   Text-based flowchart — readable in chat */
+
+                      START
+                        │
+                        ▼
+              ┌─────────────────┐
+              │   LOGIN PAGE    │
+              │  (index.jsp)    │
+              └────────┬────────┘
+                       │ credentials (username + password)
+                       ▼
+              ┌─────────────────────┐
+              │  LoginServlet       │
+              │  + UserDAO.auth()   │
+              └────────┬────────────┘
+	w
+                       │ YES
+                       ▼
+              ┌──────────────────┐
+              │  SESSION created │   (loggedUser stored)
+              └────────┬─────────┘
+                       ▼
+              ┌──────────────────┐
+              │  HomeServlet     │  ← checks ROLE
+              └────────┬─────────┘
+      ┌────────┬───────┴────────┬─────────┐
+      ▼        ▼                ▼         ▼
+  STUDENT   OFFICER         REGISTRAR   ADMIN
+      │        │                │         │
+      ▼        ▼                ▼         ▼
+ student-  officer-         registrar- admin-
+ dashboard dashboard        dashboard   dashboard
+      │        │                │         │
+      ▼        ▼                ▼         ▼
+  My Clearance | Review Queue | Final   | User, Offices,
+  (student/    | (officer/    | Verif.  | Terms, Cycles,
+   clearance)  |  queue)      | (registrar/ | Audit Logs
+      │        │              | verification)| (admin/*)
+      ▼        ▼              ▼         ▼
+   ┌──────────────────────────────────────────┐
+   │   CORE CLEARANCE FLOW (per cycle)        │
+   │                                          │
+   │  1. ADMIN creates Term + Cycle           │
+   │     + picks REQUIRED OFFICES             │
+   │        │                                 │
+   │        ▼                                 │
+   │  2. STUDENT opens My Clearance           │
+   │     → system AUTO-GENERATES one item     │
+   │       per required office (PENDING)      │
+   │        │                                 │
+   │        ▼                                 │
+   │  3. OFFICER (per office) reviews queue:  │
+   │     ┌──────────────┬────────────────┐    
+   │     │  CLEARED     │ ACTION REQUIRED│    │
+   │     │ (approved)   │ (needs action) │    │
+   │     └──────┬───────┴───────┬────────┘    
+   │            │              │ remarks      │
+   │            ▼              ▼              │
+   │  4. STUDENT sees update + notification   │
+   │     → if ACTION REQUIRED, student        │
+   │       responds; item returns to office   │
+   │            │                             │
+   │            ▼                             │
+   │  5. ALL offices CLEARED?                 │
+   │     ┌─── YES ──► overall = AWAITING_     │
+   │     │            REGISTRAR               │
+   │     └─── NO ────► overall = IN_PROGRESS  │
+   │            │                             │
+   │            ▼                             │
+   │  6. REGISTRAR Final Verification:        │
+   │     ┌──────────────┬────────────────┐    
+   │     │  APPROVE     │ RETURN FOR     │    │
+   │     │  (final)     │ ACTION (reason)│    │
+   │     └──────┬───────┴───────┬────────┘    │
+   │            ▼               ▼             │
+   │   overall=CLEARED   back to IN_PROGRESS  │
+   │   + completed_at    + student notified   │
+   └──────────────────────────────────────────┘
+                       │
+                       ▼
+        ┌──────────────────────────────┐
+        │  EVERY DECISION IS LOGGED    │
+        │  • clearance_history (per item)
+        │  • audit_logs (who, what, when)
+        │  • notifications (to student)
+        └──────────────────────────────┘
+                       │
+                       ▼
+                     END
